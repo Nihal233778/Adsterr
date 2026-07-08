@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adsgram TMA</title>
+
+    <!-- 1. Include the Adsgram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        button {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+            margin-top: 20px;
+        }
+        button:active {
+            opacity: 0.7;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            font-size: 14px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+        .reward-info {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+        .reward-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+        }
+        .reward-info p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        .coins {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #0088cc);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎮 My TMA</h1>
+        <p>Watch an ad to earn rewards!</p>
+
+        <!-- Reward display -->
+        <div class="reward-info">
+            <h3>💰 Your Balance</h3>
+            <p class="coins" id="balance">0</p>
+            <p>Coins earned</p>
+        </div>
+
+        <!-- Main action button -->
+        <button id="watchAdBtn">🎬 Watch Ad</button>
+
+        <!-- Status messages -->
+        <div id="status">Ready to earn!</div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // CONFIGURATION
+            // ============================================================
+            // IMPORTANT: Replace this with your actual Block ID from Adsgram
+            const BLOCK_ID = 'your-block-id-here';
+            // ============================================================
+
+            // State
+            let balance = 0;
+            let adController = null;
+
+            // DOM Elements
+            const watchBtn = document.getElementById('watchAdBtn');
+            const statusDiv = document.getElementById('status');
+            const balanceSpan = document.getElementById('balance');
+
+            // Helper to update the UI
+            function updateBalance(amount) {
+                balance += amount;
+                balanceSpan.textContent = balance;
+            }
+
+            function setStatus(message, isError = false) {
+                statusDiv.textContent = message;
+                statusDiv.style.color = isError ? '#e74c3c' : 'inherit';
+            }
+
+            // ============================================================
+            // INITIALIZE ADSCRAM SDK
+            // ============================================================
+            try {
+                // Initialize the Adsgram controller for Rewarded format
+                adController = window.Adsgram.init({
+                    blockId: BLOCK_ID
+                });
+                console.log('Adsgram initialized successfully');
+                setStatus('✅ Ads loaded. Click "Watch Ad" to earn!');
+            } catch (error) {
+                console.error('Failed to initialize Adsgram:', error);
+                setStatus('❌ Error loading ads. Please check your Block ID.', true);
+                watchBtn.disabled = true;
+            }
+
+            // ============================================================
+            // WATCH AD BUTTON HANDLER
+            // ============================================================
+            watchBtn.addEventListener('click', function() {
+                if (!adController) {
+                    setStatus('❌ Ads not initialized', true);
+                    return;
+                }
+
+                // Disable button while ad is playing
+                watchBtn.disabled = true;
+                setStatus('⏳ Loading ad...');
+
+                // Show the ad
+                adController.show()
+                    .then((result) => {
+                        // User watched the full ad (Rewarded format)
+                        console.log('Ad completed:', result);
+                        setStatus('🎉 You earned 5 coins!');
+                        updateBalance(5);
+                    })
+                    .catch((error) => {
+                        // User skipped, ad failed, or other error
+                        console.warn('Ad error or skipped:', error);
+                        setStatus('⏭️ Ad was skipped or an error occurred. Try again.', true);
+                    })
+                    .finally(() => {
+                        // Re-enable the button regardless of outcome
+                        watchBtn.disabled = false;
+                    });
+            });
+
+            // ============================================================
+            // TELEGRAM WEB APP INTEGRATION (Optional)
+            // ============================================================
+            // If you want to use Telegram's Web App features (like closing the app),
+            // uncomment the following code:
+            //
+            // const tg = window.Telegram.WebApp;
+            // tg.ready();
+            // tg.expand();
+            //
+            // // You can also use tg.MainButton, tg.HapticFeedback, etc.
+            // tg.MainButton.setText('Close');
+            // tg.MainButton.onClick(() => tg.close());
+
+            console.log('TMA ready!');
+        })();
+    </script>
+
+</body>
+</html>
