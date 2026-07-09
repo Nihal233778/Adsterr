@@ -2,199 +2,639 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adsgram TMA</title>
-
-    <!-- 1. Include the Adsgram SDK -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tap & Earn</title>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: var(--tg-theme-bg-color, #ffffff);
+            background: var(--tg-theme-bg-color, #f5f5f7);
             color: var(--tg-theme-text-color, #000000);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .container {
-            text-align: center;
-            padding: 20px;
-            max-width: 400px;
+
+        .app-container {
+            max-width: 420px;
             width: 100%;
         }
-        button {
-            background: var(--tg-theme-button-color, #0088cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 18px;
+
+        /* ----- HEADER ----- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .stats-badge {
+            background: var(--tg-theme-secondary-bg-color, #e0e0e0);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 14px;
             font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: opacity 0.2s;
-            margin-top: 20px;
         }
-        button:active {
+
+        /* ----- BALANCE CARD ----- */
+        .balance-card {
+            background: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 8px 0;
+            background: linear-gradient(135deg, var(--tg-theme-button-color, #0088cc), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .tap-power-info {
+            font-size: 14px;
             opacity: 0.7;
         }
-        button:disabled {
+
+        /* ----- ENERGY BAR ----- */
+        .energy-section {
+            margin-bottom: 20px;
+        }
+        .energy-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .energy-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .energy-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #ffd93d, #ff6b6b);
+            border-radius: 10px;
+            transition: width 0.2s ease;
+        }
+
+        /* ----- BIG TAP BUTTON ----- */
+        .tap-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--tg-theme-button-color, #0088cc), #005a8c);
+            border: none;
+            box-shadow: 0 8px 24px rgba(0, 136, 204, 0.4), inset 0 -4px 0 rgba(0,0,0,0.2);
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 10px auto 25px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            touch-action: manipulation;
+            position: relative;
+        }
+        .tap-button:active {
+            transform: scale(0.92);
+        }
+        .tap-button:disabled {
             opacity: 0.5;
+            transform: scale(0.95);
             cursor: not-allowed;
         }
-        #status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            font-size: 14px;
-            min-height: 50px;
+        .tap-button .emoji {
+            font-size: 42px;
+            margin-bottom: 4px;
+        }
+        .tap-button .hint {
+            font-size: 13px;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        /* ----- AD ACTION ROW ----- */
+        .ad-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .ad-btn {
+            flex: 1;
+            padding: 14px 0;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            touch-action: manipulation;
             display: flex;
             align-items: center;
             justify-content: center;
-            word-break: break-word;
+            gap: 8px;
         }
-        .reward-info {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        .ad-btn:active { opacity: 0.7; }
+        .ad-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-reward {
+            background: #ffd93d;
+            color: #1a1a1a;
         }
-        .reward-info h3 {
-            margin: 0 0 5px 0;
-            font-size: 16px;
+        .btn-task {
+            background: #6c5ce7;
+            color: #ffffff;
         }
-        .reward-info p {
-            margin: 0;
+
+        /* ----- SHOP / UPGRADES ----- */
+        .shop-section {
+            background: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .shop-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--tg-theme-bg-color, #f0f0f0);
+        }
+        .shop-item:last-child { border-bottom: none; }
+        .shop-item-info { display: flex; flex-direction: column; }
+        .shop-item-name { font-weight: 600; }
+        .shop-item-desc { font-size: 13px; opacity: 0.6; }
+        .buy-btn {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #fff);
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 600;
             font-size: 14px;
-            opacity: 0.7;
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
-        .coins {
+        .buy-btn:active { opacity: 0.6; }
+        .buy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* ----- STATS FOOTER ----- */
+        .stats-footer {
+            display: flex;
+            justify-content: space-around;
+            padding: 14px;
+            background: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 16px;
+            font-size: 13px;
+            text-align: center;
+        }
+        .stats-footer span { opacity: 0.6; display: block; font-size: 11px; }
+        .stats-footer strong { font-size: 16px; }
+
+        /* ----- TASK MODAL ----- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--tg-theme-bg-color, #fff);
+            border-radius: 28px;
+            padding: 24px;
+            max-width: 380px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
             font-size: 28px;
-            font-weight: bold;
-            color: var(--tg-theme-button-color, #0088cc);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--tg-theme-text-color, #000);
+            opacity: 0.6;
         }
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        /* Scrollbar Hide */
+        ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎮 My TMA</h1>
-        <p>Watch an ad to earn rewards!</p>
+<div class="app-container">
 
-        <!-- Reward display -->
-        <div class="reward-info">
-            <h3>💰 Your Balance</h3>
-            <p class="coins" id="balance">0</p>
-            <p>Coins earned</p>
-        </div>
-
-        <!-- Main action button -->
-        <button id="watchAdBtn">🎬 Watch Ad</button>
-
-        <!-- Status messages -->
-        <div id="status">Ready to earn!</div>
+    <!-- HEADER -->
+    <div class="header">
+        <h1>⚡ Tap & Earn</h1>
+        <div class="stats-badge" id="levelDisplay">Lv. 1</div>
     </div>
 
-    <script>
-        (function() {
-            'use strict';
+    <!-- BALANCE -->
+    <div class="balance-card">
+        <div class="balance-label">💰 Your Balance</div>
+        <div class="balance-amount" id="balanceDisplay">0</div>
+        <div class="tap-power-info">⚡ Power: <span id="powerDisplay">1</span> per tap</div>
+    </div>
 
-            // ============================================================
-            // CONFIGURATION
-            // ============================================================
-            // IMPORTANT: Replace this with your actual Block ID from Adsgram
-            const BLOCK_ID = 'your-block-id-here';
-            // ============================================================
+    <!-- ENERGY -->
+    <div class="energy-section">
+        <div class="energy-header">
+            <span>🔋 Energy</span>
+            <span id="energyText">100 / 100</span>
+        </div>
+        <div class="energy-bar-bg">
+            <div class="energy-bar-fill" id="energyFill" style="width:100%"></div>
+        </div>
+    </div>
 
-            // State
-            let balance = 0;
-            let adController = null;
+    <!-- TAP BUTTON -->
+    <button class="tap-button" id="tapBtn">
+        <span class="emoji">🪙</span>
+        TAP!
+        <span class="hint">+<span id="tapRewardHint">1</span></span>
+    </button>
 
-            // DOM Elements
-            const watchBtn = document.getElementById('watchAdBtn');
-            const statusDiv = document.getElementById('status');
-            const balanceSpan = document.getElementById('balance');
+    <!-- AD ACTIONS -->
+    <div class="ad-actions">
+        <button class="ad-btn btn-reward" id="watchAdBtn">🎬 Video Ad</button>
+        <button class="ad-btn btn-task" id="taskAdBtn">📋 Task</button>
+    </div>
 
-            // Helper to update the UI
-            function updateBalance(amount) {
-                balance += amount;
-                balanceSpan.textContent = balance;
+    <!-- SHOP -->
+    <div class="shop-section">
+        <div class="shop-title">🛒 Upgrades</div>
+
+        <div class="shop-item">
+            <div class="shop-item-info">
+                <span class="shop-item-name">⚡ Power Boost</span>
+                <span class="shop-item-desc">+1 coin per tap</span>
+            </div>
+            <button class="buy-btn" id="buyPowerBtn">50 🪙</button>
+        </div>
+
+        <div class="shop-item">
+            <div class="shop-item-info">
+                <span class="shop-item-name">🔋 Max Energy</span>
+                <span class="shop-item-desc">+25 energy cap</span>
+            </div>
+            <button class="buy-btn" id="buyEnergyBtn">75 🪙</button>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-footer">
+        <div><span>👆 Taps</span><strong id="statTaps">0</strong></div>
+        <div><span>🎬 Ads Watched</span><strong id="statAds">0</strong></div>
+        <div><span>📋 Tasks Done</span><strong id="statTasks">0</strong></div>
+    </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="taskModal">
+    <div class="modal-box">
+        <button class="modal-close" id="closeTaskModal">✕</button>
+        <div class="modal-title">📋 Complete a Task</div>
+        <div id="taskContainer"></div>
+        <p style="font-size:13px; opacity:0.6; margin-top:16px; text-align:center;">
+            Complete the task below to earn <strong>20 coins</strong>.
+        </p>
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // =====================================================
+        // 1. CONFIG
+        // =====================================================
+        const BLOCK_ID_REWARD = 'your-reward-block-id';   // Replace with your Reward block ID
+        const BLOCK_ID_TASK = 'your-task-block-id';       // Replace with your Task block ID
+
+        // =====================================================
+        // 2. TELEGRAM WEB APP SDK
+        // =====================================================
+        let tg = null;
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
+                tg.enableClosingConfirmation();
+            }
+        } catch(e) { console.warn('Not in Telegram context'); }
+
+        function haptic(style = 'medium') {
+            try { if (tg) tg.HapticFeedback.impactOccurred(style); } catch(e) {}
+        }
+
+        // =====================================================
+        // 3. STATE (with LocalStorage persistence)
+        // =====================================================
+        const state = {
+            balance: parseInt(localStorage.getItem('tma_balance') || '0'),
+            tapPower: parseInt(localStorage.getItem('tma_power') || '1'),
+            maxEnergy: parseInt(localStorage.getItem('tma_maxEnergy') || '100'),
+            totalTaps: parseInt(localStorage.getItem('tma_taps') || '0'),
+            adsWatched: parseInt(localStorage.getItem('tma_ads') || '0'),
+            tasksDone: parseInt(localStorage.getItem('tma_tasks') || '0'),
+            energy: 100, // will be set below
+        };
+        // If maxEnergy changed, ensure energy doesn't exceed it
+        state.energy = Math.min(
+            parseInt(localStorage.getItem('tma_energy') || '100'),
+            state.maxEnergy
+        );
+
+        function saveState() {
+            localStorage.setItem('tma_balance', state.balance);
+            localStorage.setItem('tma_power', state.tapPower);
+            localStorage.setItem('tma_maxEnergy', state.maxEnergy);
+            localStorage.setItem('tma_taps', state.totalTaps);
+            localStorage.setItem('tma_ads', state.adsWatched);
+            localStorage.setItem('tma_tasks', state.tasksDone);
+            localStorage.setItem('tma_energy', state.energy);
+        }
+
+        // =====================================================
+        // 4. DOM REFS
+        // =====================================================
+        const balanceEl = document.getElementById('balanceDisplay');
+        const powerEl = document.getElementById('powerDisplay');
+        const tapRewardHint = document.getElementById('tapRewardHint');
+        const energyText = document.getElementById('energyText');
+        const energyFill = document.getElementById('energyFill');
+        const tapBtn = document.getElementById('tapBtn');
+        const watchAdBtn = document.getElementById('watchAdBtn');
+        const taskAdBtn = document.getElementById('taskAdBtn');
+        const buyPowerBtn = document.getElementById('buyPowerBtn');
+        const buyEnergyBtn = document.getElementById('buyEnergyBtn');
+        const statTaps = document.getElementById('statTaps');
+        const statAds = document.getElementById('statAds');
+        const statTasks = document.getElementById('statTasks');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const taskModal = document.getElementById('taskModal');
+        const taskContainer = document.getElementById('taskContainer');
+        const closeTaskModal = document.getElementById('closeTaskModal');
+
+        // =====================================================
+        // 5. UI UPDATE FUNCTION
+        // =====================================================
+        function updateUI() {
+            balanceEl.textContent = state.balance;
+            powerEl.textContent = state.tapPower;
+            tapRewardHint.textContent = state.tapPower;
+            energyText.textContent = `${Math.floor(state.energy)} / ${state.maxEnergy}`;
+            const pct = (state.energy / state.maxEnergy) * 100;
+            energyFill.style.width = `${Math.min(pct, 100)}%`;
+
+            statTaps.textContent = state.totalTaps;
+            statAds.textContent = state.adsWatched;
+            statTasks.textContent = state.tasksDone;
+
+            const level = Math.floor(state.totalTaps / 50) + 1;
+            levelDisplay.textContent = `Lv. ${level}`;
+
+            // Disable tap if no energy
+            tapBtn.disabled = (state.energy < 1);
+
+            // Shop buttons
+            buyPowerBtn.disabled = (state.balance < 50);
+            buyEnergyBtn.disabled = (state.balance < 75);
+
+            saveState();
+        }
+
+        // =====================================================
+        // 6. ENERGY REGENERATION
+        // =====================================================
+        setInterval(() => {
+            if (state.energy < state.maxEnergy) {
+                state.energy = Math.min(state.energy + 1, state.maxEnergy);
+                updateUI();
+            }
+        }, 3000); // 1 energy per 3 seconds
+
+        // =====================================================
+        // 7. TAP LOGIC
+        // =====================================================
+        tapBtn.addEventListener('click', function() {
+            if (state.energy < 1) {
+                haptic('error');
+                return;
             }
 
-            function setStatus(message, isError = false) {
-                statusDiv.textContent = message;
-                statusDiv.style.color = isError ? '#e74c3c' : 'inherit';
-            }
+            // Deduct energy
+            state.energy -= 1;
+            // Add coins
+            state.balance += state.tapPower;
+            state.totalTaps += 1;
 
-            // ============================================================
-            // INITIALIZE ADSCRAM SDK
-            // ============================================================
-            try {
-                // Initialize the Adsgram controller for Rewarded format
-                adController = window.Adsgram.init({
-                    blockId: BLOCK_ID
+            haptic('medium');
+            updateUI();
+
+            // Tiny pop animation on the button
+            tapBtn.style.transform = 'scale(0.88)';
+            setTimeout(() => { tapBtn.style.transform = ''; }, 120);
+        });
+
+        // =====================================================
+        // 8. ADSGRAM INTEGRATION (Reward Video)
+        // =====================================================
+        let rewardController = null;
+        try {
+            rewardController = window.Adsgram.init({
+                blockId: BLOCK_ID_REWARD
+            });
+            console.log('Reward Ads initialized');
+        } catch(e) {
+            console.error('Reward init error:', e);
+            watchAdBtn.disabled = true;
+        }
+
+        watchAdBtn.addEventListener('click', function() {
+            if (!rewardController) return;
+            haptic('heavy');
+            watchAdBtn.disabled = true;
+            watchAdBtn.textContent = '⏳ Loading...';
+
+            rewardController.show()
+                .then((res) => {
+                    state.balance += 10;
+                    state.adsWatched += 1;
+                    haptic('success');
+                    updateUI();
+                    watchAdBtn.textContent = '✅ +10 🪙';
+                    setTimeout(() => {
+                        watchAdBtn.innerHTML = '🎬 Video Ad';
+                        watchAdBtn.disabled = false;
+                    }, 1500);
+                })
+                .catch((err) => {
+                    console.warn('Ad skipped/error:', err);
+                    watchAdBtn.textContent = '⏭️ Skipped';
+                    setTimeout(() => {
+                        watchAdBtn.innerHTML = '🎬 Video Ad';
+                        watchAdBtn.disabled = false;
+                    }, 1200);
                 });
-                console.log('Adsgram initialized successfully');
-                setStatus('✅ Ads loaded. Click "Watch Ad" to earn!');
-            } catch (error) {
-                console.error('Failed to initialize Adsgram:', error);
-                setStatus('❌ Error loading ads. Please check your Block ID.', true);
-                watchBtn.disabled = true;
-            }
+        });
 
-            // ============================================================
-            // WATCH AD BUTTON HANDLER
-            // ============================================================
-            watchBtn.addEventListener('click', function() {
-                if (!adController) {
-                    setStatus('❌ Ads not initialized', true);
-                    return;
+        // =====================================================
+        // 9. TASK ADS (using Web Component)
+        // =====================================================
+        function openTaskModal() {
+            // Clear previous
+            taskContainer.innerHTML = '';
+
+            // Create task component
+            const taskEl = document.createElement('adsgram-task');
+            taskEl.setAttribute('data-block-id', BLOCK_ID_TASK);
+            taskEl.setAttribute('data-debug', 'false');
+            // Listen for completion
+            taskEl.addEventListener('onComplete', function(e) {
+                const result = e.detail;
+                if (result && result.success) {
+                    state.balance += 20;
+                    state.tasksDone += 1;
+                    haptic('success');
+                    updateUI();
+                    // Show success briefly, then close
+                    taskContainer.innerHTML = '<p style="text-align:center;color:green;font-weight:bold;">✅ Task done! +20 coins</p>';
+                    setTimeout(() => {
+                        taskModal.classList.remove('active');
+                        // Reset container for next time
+                        taskContainer.innerHTML = '';
+                    }, 1500);
+                } else {
+                    // Task failed or not completed fully
+                    taskContainer.innerHTML = '<p style="text-align:center;color:orange;">Task not completed, try again.</p>';
                 }
-
-                // Disable button while ad is playing
-                watchBtn.disabled = true;
-                setStatus('⏳ Loading ad...');
-
-                // Show the ad
-                adController.show()
-                    .then((result) => {
-                        // User watched the full ad (Rewarded format)
-                        console.log('Ad completed:', result);
-                        setStatus('🎉 You earned 5 coins!');
-                        updateBalance(5);
-                    })
-                    .catch((error) => {
-                        // User skipped, ad failed, or other error
-                        console.warn('Ad error or skipped:', error);
-                        setStatus('⏭️ Ad was skipped or an error occurred. Try again.', true);
-                    })
-                    .finally(() => {
-                        // Re-enable the button regardless of outcome
-                        watchBtn.disabled = false;
-                    });
             });
 
-            // ============================================================
-            // TELEGRAM WEB APP INTEGRATION (Optional)
-            // ============================================================
-            // If you want to use Telegram's Web App features (like closing the app),
-            // uncomment the following code:
-            //
-            // const tg = window.Telegram.WebApp;
-            // tg.ready();
-            // tg.expand();
-            //
-            // // You can also use tg.MainButton, tg.HapticFeedback, etc.
-            // tg.MainButton.setText('Close');
-            // tg.MainButton.onClick(() => tg.close());
+            taskContainer.appendChild(taskEl);
+            taskModal.classList.add('active');
+        }
 
-            console.log('TMA ready!');
-        })();
-    </script>
+        taskAdBtn.addEventListener('click', function() {
+            haptic('heavy');
+            openTaskModal();
+        });
+
+        closeTaskModal.addEventListener('click', function() {
+            taskModal.classList.remove('active');
+            // Clean up to stop any ongoing task polling
+            taskContainer.innerHTML = '';
+        });
+
+        // Click outside to close
+        taskModal.addEventListener('click', function(e) {
+            if (e.target === taskModal) {
+                taskModal.classList.remove('active');
+                taskContainer.innerHTML = '';
+            }
+        });
+
+        // =====================================================
+        // 10. SHOP LOGIC
+        // =====================================================
+        buyPowerBtn.addEventListener('click', function() {
+            if (state.balance < 50) { haptic('error'); return; }
+            state.balance -= 50;
+            state.tapPower += 1;
+            haptic('success');
+            updateUI();
+        });
+
+        buyEnergyBtn.addEventListener('click', function() {
+            if (state.balance < 75) { haptic('error'); return; }
+            state.balance -= 75;
+            state.maxEnergy += 25;
+            state.energy = Math.min(state.energy + 25, state.maxEnergy); // give some energy immediately
+            haptic('success');
+            updateUI();
+        });
+
+        // =====================================================
+        // 11. INIT
+        // =====================================================
+        updateUI();
+        console.log('🚀 Interactive TMA ready!');
+
+        // Show a welcome if low balance
+        if (state.balance === 0 && state.totalTaps === 0) {
+            setTimeout(() => {
+                const welcome = document.createElement('div');
+                welcome.style.cssText = `
+                    position:fixed; bottom:20px; left:20px; right:20px; 
+                    background: var(--tg-theme-button-color, #0088cc); 
+                    color: #fff; padding:16px; border-radius:16px; 
+                    text-align:center; font-weight:600; z-index:10;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                `;
+                welcome.textContent = '👋 Tap the big coin to start earning!';
+                document.body.appendChild(welcome);
+                setTimeout(() => welcome.remove(), 3000);
+            }, 500);
+        }
+
+    })();
+</script>
 
 </body>
 </html>
