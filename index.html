@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tap & Earn</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <script src="https://adsota.io/public/sdk/tma.js"></script>
     <style>
         * {
             margin: 0;
@@ -365,9 +367,14 @@
         // =====================================================
         const BLOCK_ID_REWARD = 'your-reward-block-id';   // Replace with your Reward block ID
         const BLOCK_ID_TASK = 'your-task-block-id';       // Replace with your Task block ID
+        const SOTA_CONFIG = {
+            token: 'sota_Zg7xuvdon4o4asS78E0Hv1g6UkWC4mCVIEvmbeQqLno',
+            api: 'https://adsota.io',
+            auto: true
+        };
 
         // =====================================================
-        // 2. TELEGRAM WEB APP SDK
+        // 2. TELEGRAM WEB APP SDK & AD NETWORKS
         // =====================================================
         let tg = null;
         try {
@@ -378,6 +385,13 @@
                 tg.enableClosingConfirmation();
             }
         } catch(e) { console.warn('Not in Telegram context'); }
+
+        try {
+            if (window.SotaAds && typeof window.SotaAds.init === 'function') {
+                window.SotaAds.init(SOTA_CONFIG);
+                console.log('SotaAds initialized');
+            }
+        } catch(e) { console.warn('SotaAds init error:', e); }
 
         function haptic(style = 'medium') {
             try { if (tg) tg.HapticFeedback.impactOccurred(style); } catch(e) {}
