@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tap & Earn</title>
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- SotaAds TMA SDK -->
     <script src="https://adsota.io/public/sdk/tma.js"></script>
     <style>
         * {
@@ -297,16 +299,16 @@
         'use strict';
 
         // =====================================================
-        // 1. CONFIG
+        // 1. CONFIG — SotaAds token from the second snippet
         // =====================================================
         const SOTA_CONFIG = {
-            token: 'sota_v_zLcYSDYIwjjPk1jIX5pHo97PZFpqdnoEcdi-PIHwc',
+            token: 'sota_0DjlW0xgKyUstqHz8_J5ZyjNsFS7rB1tyHvjr3-WGdk', // updated token
             api: 'https://adsota.io',
-            auto: false
+            auto: true          // matches the second snippet; SDK manages display automatically
         };
 
         // =====================================================
-        // 2. TELEGRAM WEB APP SDK & SOTA ADS
+        // 2. TELEGRAM WEB APP SDK & SOTA ADS INIT
         // =====================================================
         let tg = null;
         try {
@@ -318,10 +320,13 @@
             }
         } catch(e) { console.warn('Not in Telegram context'); }
 
+        // Initialize SotaAds with the token from the second snippet
         try {
             if (window.SotaAds && typeof window.SotaAds.init === 'function') {
                 window.SotaAds.init(SOTA_CONFIG);
-                console.log('SotaAds initialized');
+                console.log('✅ SotaAds initialized (auto = true)');
+            } else {
+                console.warn('SotaAds SDK not loaded yet');
             }
         } catch(e) { console.warn('SotaAds init error:', e); }
 
@@ -432,13 +437,17 @@
         });
 
         // =====================================================
-        // 8. SHOW AD BUTTON LOGIC
+        // 8. SHOW AD BUTTON LOGIC  —  SotaAds with auto=true
+        //    Since SotaAds.init({ auto: true }) is used, the SDK
+        //    handles ad display automatically. We simply trigger
+        //    the ad request and reward the user.
         // =====================================================
         function triggerSotaAd() {
             const sota = window.SotaAds;
             if (!sota) {
                 return Promise.reject(new Error('SotaAds SDK not available'));
             }
+            // With auto: true the SDK exposes either showAd / show / loadAd
             if (typeof sota.showAd === 'function') {
                 return Promise.resolve(sota.showAd());
             }
@@ -448,7 +457,7 @@
             if (typeof sota.loadAd === 'function') {
                 return Promise.resolve(sota.loadAd());
             }
-            // If auto: true manages display automatically
+            // If auto: true manages display automatically, nothing extra is needed
             return Promise.resolve();
         }
 
@@ -459,6 +468,7 @@
 
             triggerSotaAd()
                 .then(() => {
+                    // Reward the user after ad is triggered
                     state.balance += 10;
                     haptic('success');
                     updateUI();
@@ -499,7 +509,7 @@
         // 10. INIT
         // =====================================================
         updateUI();
-        console.log('🚀 Interactive TMA ready!');
+        console.log('🚀 Interactive TMA ready! (SotaAds auto mode)');
 
         // Show a welcome if low balance
         if (state.balance === 0 && state.totalTaps === 0) {
