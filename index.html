@@ -300,16 +300,16 @@
         'use strict';
 
         // =====================================================
-        // 1. CONFIG — SotaAds token (updated from second snippet)
+        // 1. CONFIG — SotaAds token from second snippet
         // =====================================================
         const SOTA_CONFIG = {
-            token: 'sota_dEwcD3QS9EXbUItY8Z4QTjEI5tQEUfH5Iw68xiqe-rQ', // updated token
+            token: 'sota_dEwcD3QS9EXbUItY8Z4QTjEI5tQEUfH5Iw68xiqe-rQ',
             api: 'https://adsota.io',
-            auto: true          // SDK manages auto display
+            auto: true
         };
 
         // =====================================================
-        // 2. TELEGRAM WEB APP SDK & SOTA ADS INIT
+        // 2. TELEGRAM WEB APP SDK
         // =====================================================
         let tg = null;
         try {
@@ -318,32 +318,23 @@
                 tg.ready();
                 tg.expand();
                 tg.enableClosingConfirmation();
+                console.log('📱 Telegram WebApp ready');
             }
-        } catch(e) { console.warn('Not in Telegram context'); }
-
-        // Initialize SotaAds with the token from the second snippet
-        try {
-            if (window.SotaAds && typeof window.SotaAds.init === 'function') {
-                window.SotaAds.init(SOTA_CONFIG);
-                console.log('✅ SotaAds initialized (auto = true) with token:', SOTA_CONFIG.token);
-            } else {
-                console.warn('SotaAds SDK not loaded yet');
-            }
-        } catch(e) { console.warn('SotaAds init error:', e); }
+        } catch (e) { console.warn('Not in Telegram context', e); }
 
         function haptic(style = 'medium') {
-            try { if (tg) tg.HapticFeedback.impactOccurred(style); } catch(e) {}
+            try { if (tg) tg.HapticFeedback.impactOccurred(style); } catch (e) {}
         }
 
         // =====================================================
-        // 3. STATE (with LocalStorage persistence)
+        // 3. STATE (LocalStorage persistence)
         // =====================================================
         const state = {
             balance: parseInt(localStorage.getItem('tma_balance') || '0'),
             tapPower: parseInt(localStorage.getItem('tma_power') || '1'),
             maxEnergy: parseInt(localStorage.getItem('tma_maxEnergy') || '100'),
             totalTaps: parseInt(localStorage.getItem('tma_taps') || '0'),
-            energy: 100,
+            energy: 100
         };
         state.energy = Math.min(
             parseInt(localStorage.getItem('tma_energy') || '100'),
@@ -376,7 +367,7 @@
         const levelDisplay = document.getElementById('levelDisplay');
 
         // =====================================================
-        // 5. UI UPDATE FUNCTION
+        // 5. UI UPDATE
         // =====================================================
         function updateUI() {
             balanceEl.textContent = state.balance;
@@ -401,7 +392,7 @@
         }
 
         // =====================================================
-        // 6. ENERGY REGENERATION
+        // 6. ENERGY REGEN
         // =====================================================
         setInterval(() => {
             if (state.energy < state.maxEnergy) {
@@ -413,54 +404,97 @@
         // =====================================================
         // 7. TAP LOGIC
         // =====================================================
-        tapBtn.addEventListener('click', function() {
-            if (state.energy < 1) {
-                haptic('error');
-                return;
-            }
+        tapBtn.addEventListener('click', function () {
+            if (state.energy < 1) { haptic('error'); return; }
             state.energy -= 1;
             state.balance += state.tapPower;
             state.totalTaps += 1;
-
             haptic('medium');
             updateUI();
-
             tapBtn.style.transform = 'scale(0.88)';
             setTimeout(() => { tapBtn.style.transform = ''; }, 120);
         });
 
         // =====================================================
-        // 8. SHOW AD BUTTON — SotaAds integration with auto=true
-        //    The SDK automatically handles ad display. We trigger
-        //    the ad request, then reward on success.
+        // 8. SOTA ADS — initialization (called after window.load)
         // =====================================================
-        function triggerSotaAd() {
-            const sota = window.SotaAds;
-            if (!sota) {
-                return Promise.reject(new Error('SotaAds SDK not available'));
+        let sotaReady = false;
+
+        function initSotaAds() {
+            if (!window.SotaAds) {
+                console.warn('❌ SotaAds SDK NOT loaded — check network or script URL');
+                return;
             }
-            // With auto: true the SDK exposes showAd / show / loadAd
-            if (typeof sota.showAd === 'function') {
-                return Promise.resolve(sota.showAd());
+            try {
+                window.SotaAds.init(SOTA_CONFIG);
+                sotaReady = true;
+                console.log('✅ SotaAds initialized with token:', SOTA_CONFIG.token);
+                console.log('🔍 SotaAds object keys:', Object.keys(window.SotaAds));
+            } catch (e) {
+                console.error('❌ SotaAds init error:', e);
             }
-            if (typeof sota.show === 'function') {
-                return Promise.resolve(sota.show());
-            }
-            if (typeof sota.loadAd === 'function') {
-                return Promise.resolve(sota.loadAd());
-            }
-            // auto mode fallback — SDK may have handled it already
-            return Promise.resolve();
         }
 
-        showAdBtn.addEventListener('click', function() {
+        // Wait until SDK is fully loaded
+        window.addEventListener('load', function () {
+            // Give the SDK a moment to register itself
+            setTimeout(initSotaAds, 300);
+        });
+
+        // =====================================================
+        // 9. SHOW AD BUTTON LOGIC
+        // =====================================================
+        function triggerSotaAd() {
+            return new Promise((resolve, reject) => {
+                const sota = window.SotaAds;
+
+                if (!sota) {
+                    reject(new Error('SotaAds SDK not loaded'));
+                    return;
+                }
+
+                console.log('🔍 Attempting to show ad. Available methods:', 
+                    Object.keys(sota).filter(k => typeof sota[k] === 'function'));
+
+                // Try every possible show method the SDK might expose
+                const methods = ['showAd', 'showRewarded', 'show', 'loadAndShow', 'loadAd'];
+
+                for (const method of methods) {
+                    if (typeof sota[method] === 'function') {
+                        try {
+                            console.log(`▶️ Calling SotaAds.${method}()`);
+                            const result = sota[method]();
+                            if (result && typeof result.then === 'function') {
+                                result.then(resolve).catch(reject);
+                            } else {
+                                resolve(result);
+                            }
+                            return;
+                        } catch (e) {
+                            console.warn(`⚠️ ${method} threw:`, e);
+                        }
+                    }
+                }
+
+                // If auto mode is on, the SDK may display automatically
+                if (SOTA_CONFIG.auto) {
+                    console.warn('⚠️ No show method found. Auto mode active — SDK may handle display itself.');
+                    resolve({ auto: true });
+                } else {
+                    reject(new Error('No show method available on SotaAds'));
+                }
+            });
+        }
+
+        showAdBtn.addEventListener('click', function () {
             haptic('heavy');
             showAdBtn.disabled = true;
             showAdBtn.textContent = '⏳ Loading Ad...';
 
             triggerSotaAd()
-                .then(() => {
-                    // Reward the user after ad is triggered
+                .then((result) => {
+                    console.log('✅ Ad triggered successfully:', result);
+                    // Reward only if ad actually displayed
                     state.balance += 10;
                     haptic('success');
                     updateUI();
@@ -471,16 +505,19 @@
                     }, 1500);
                 })
                 .catch((err) => {
-                    console.warn('Show Ad error/unavailable:', err);
-                    showAdBtn.textContent = '📺 Show Ad +10 🪙';
-                    showAdBtn.disabled = false;
+                    console.error('❌ Ad failed:', err);
+                    showAdBtn.textContent = '⚠️ Ad unavailable';
+                    setTimeout(() => {
+                        showAdBtn.textContent = '📺 Show Ad +10 🪙';
+                        showAdBtn.disabled = false;
+                    }, 2000);
                 });
         });
 
         // =====================================================
-        // 9. SHOP LOGIC
+        // 10. SHOP LOGIC
         // =====================================================
-        buyPowerBtn.addEventListener('click', function() {
+        buyPowerBtn.addEventListener('click', function () {
             if (state.balance < 50) { haptic('error'); return; }
             state.balance -= 50;
             state.tapPower += 1;
@@ -488,7 +525,7 @@
             updateUI();
         });
 
-        buyEnergyBtn.addEventListener('click', function() {
+        buyEnergyBtn.addEventListener('click', function () {
             if (state.balance < 75) { haptic('error'); return; }
             state.balance -= 75;
             state.maxEnergy += 25;
@@ -498,19 +535,19 @@
         });
 
         // =====================================================
-        // 10. INIT
+        // 11. INIT
         // =====================================================
         updateUI();
-        console.log('🚀 Tap & Earn TMA ready! SotaAds auto mode with token:', SOTA_CONFIG.token);
+        console.log('🚀 Tap & Earn TMA ready!');
 
         // Welcome toast for new users
         if (state.balance === 0 && state.totalTaps === 0) {
             setTimeout(() => {
                 const welcome = document.createElement('div');
                 welcome.style.cssText = `
-                    position:fixed; bottom:20px; left:20px; right:20px; 
-                    background: var(--tg-theme-button-color, #0088cc); 
-                    color: #fff; padding:16px; border-radius:16px; 
+                    position:fixed; bottom:20px; left:20px; right:20px;
+                    background: var(--tg-theme-button-color, #0088cc);
+                    color: #fff; padding:16px; border-radius:16px;
                     text-align:center; font-weight:600; z-index:10;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
                 `;
@@ -524,4 +561,7 @@
 
 </body>
 </html>
-                                                    
+        
+
+        
+                        .
