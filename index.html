@@ -3,150 +3,613 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gold Miner - Tap & Earn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fabb Bot - Tap & Earn</title>
 
+<!-- Telegram SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+<!-- Official Sota Ads SDK supplied by you -->
+<script src="https://adsota.io/public/sdk/tma.js"></script>
+
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;padding:20px;
- font-family:Arial,sans-serif;
- background:#101827;color:white;
- text-align:center
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
-h2{color:#ffd34e}
-.card{
- background:#202c40;
- padding:22px;border-radius:20px;
- margin:18px 0
+
+body {
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: #fff;
+  padding: 16px;
 }
-.balance{font-size:48px;color:#ffd34e}
-button{
- border:0;border-radius:14px;
- padding:16px 24px;
- font-size:17px;font-weight:bold;
- cursor:pointer;margin:8px
+
+.container {
+  max-width: 450px;
+  margin: auto;
 }
-#tap{background:#168de0;color:white;
- width:220px;height:220px;border-radius:50%;
- font-size:27px}
-#watch{background:#f6b934;color:#171717}
-#status{color:#ffd34e;min-height:25px}
-.banner{
- background:#202c40;border:1px dashed #64748b;
- border-radius:14px;padding:18px;
- min-height:100px;margin:18px 0
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 22px;
+}
+
+.header h2 {
+  font-size: 25px;
+}
+
+.level {
+  background: #263449;
+  padding: 10px 16px;
+  border-radius: 25px;
+}
+
+.card {
+  background: #202d43;
+  padding: 24px;
+  border-radius: 24px;
+  margin-bottom: 20px;
+}
+
+.balance-card {
+  text-align: center;
+}
+
+.balance-label {
+  color: #aaa;
+  letter-spacing: 2px;
+}
+
+.balance {
+  font-size: 55px;
+  font-weight: bold;
+  color: #ffd34e;
+  margin: 12px;
+}
+
+.power-text {
+  color: #ccc;
+}
+
+.energy-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.energy-bg {
+  width: 100%;
+  height: 13px;
+  background: #39465a;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.energy-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,#ffd93d,#ff6464);
+  transition: width .2s;
+}
+
+.tap-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 15px 0 30px;
+}
+
+.tap-button {
+  width: 260px;
+  height: 260px;
+  border: none;
+  border-radius: 50%;
+  background: #168de0;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  box-shadow: 0 10px 25px #168de044;
+  cursor: pointer;
+}
+
+.tap-button:active {
+  transform: scale(.94);
+}
+
+.tap-button:disabled {
+  opacity: .5;
+}
+
+.tap-button span {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 45px;
+}
+
+.section-title {
+  font-size: 23px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.reward-description {
+  text-align: center;
+  color: #ddd;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+.reward-button {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 15px;
+  padding: 19px;
+  background: #ffbd32;
+  color: #171717;
+  font-size: 19px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.reward-button:disabled {
+  opacity: .6;
+}
+
+.status {
+  margin-top: 18px;
+  text-align: center;
+  color: #ffd34e;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.banner-heading {
+  text-align: center;
+  font-size: 23px;
+  margin: 24px 0 15px;
+}
+
+/* Sota SDK controls automatic ad rendering */
+#sota-status {
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  margin: 8px 0 20px;
+}
+
+.upgrade-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.upgrade-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 0;
+  border-bottom: 1px solid #ffffff20;
+}
+
+.upgrade-item:last-child {
+  border-bottom: none;
+}
+
+.upgrade-description {
+  color: #aaa;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.buy-button {
+  border: none;
+  background: #168de0;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 30px;
+  font-weight: bold;
+}
+
+.buy-button:disabled {
+  opacity: .4;
+}
+
+.statistics {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.statistics span {
+  display: block;
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 7px;
+}
+
+.statistics strong {
+  font-size: 19px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>⚡ Gold Miner</h2>
-<div class="card">
- <p>YOUR BALANCE</p>
- <div class="balance" id="balance">0</div>
- <p>⚡ Energy: <span id="energy">100</span>/100</p>
-</div>
+<div class="container">
 
-<button id="tap">🪙 TAP!</button>
+  <!-- HEADER -->
+  <div class="header">
+    <h2>⚡ Tap & Earn</h2>
+    <div class="level" id="level">Lv. 1</div>
+  </div>
 
-<div class="card">
- <h3>🎬 Watch an Ad</h3>
- <p>Watch a video to earn 10 coins.</p>
- <button id="watch">Watch Rewarded Ad</button>
- <p id="status">Rewarded ads not configured yet.</p>
-</div>
+  <!-- BALANCE -->
+  <div class="card balance-card">
+    <div class="balance-label">💰 YOUR BALANCE</div>
+    <div class="balance" id="balance">0</div>
+    <div class="power-text">
+      ⚡ Power: <span id="power">1</span> per tap
+    </div>
+  </div>
 
-<h3>📢 Advertisement</h3>
-<div class="banner" id="sota-banner">
- Sota Ads banner placement
-</div>
+  <!-- ENERGY -->
+  <div class="energy-section">
+    <div class="energy-header">
+      <strong>🔋 Energy</strong>
+      <span id="energyText">100 / 100</span>
+    </div>
 
-<div class="card">
- <h3>🛒 Upgrades</h3>
- <button onclick="upgrade()">Power Boost - 50 coins</button>
- <p>Power: <span id="power">1</span></p>
+    <div class="energy-bg">
+      <div class="energy-fill" id="energyFill"></div>
+    </div>
+  </div>
+
+  <!-- TAP BUTTON -->
+  <div class="tap-wrapper">
+    <button class="tap-button" id="tapButton">
+      <span>🪙</span>
+      TAP!
+      <small style="font-size:17px;margin-top:8px">
+        +<span id="tapPower">1</span>
+      </small>
+    </button>
+  </div>
+
+  <!-- REWARDED AD -->
+  <div class="card">
+    <h2 class="section-title">🎬 Watch an Ad</h2>
+
+    <p class="reward-description">
+      Watch a video to earn 10 coins.
+    </p>
+
+    <button class="reward-button" id="rewardButton">
+      Watch Rewarded Ad
+    </button>
+
+    <div class="status" id="rewardStatus">
+      Rewarded video API requires configuration.
+    </div>
+  </div>
+
+  <!-- BANNER AD -->
+  <h2 class="banner-heading">📢 Advertisement</h2>
+
+  <div id="sota-status">
+    Sota automatic banner integration initializing...
+  </div>
+
+  <!-- UPGRADES -->
+  <div class="card">
+    <h2 class="upgrade-title">🛒 Upgrades</h2>
+
+    <div class="upgrade-item">
+      <div>
+        <strong>⚡ Power Boost</strong>
+        <div class="upgrade-description">
+          +1 coin per tap
+        </div>
+      </div>
+
+      <button class="buy-button" id="powerUpgrade">
+        50 🪙
+      </button>
+    </div>
+
+    <div class="upgrade-item">
+      <div>
+        <strong>🔋 Max Energy</strong>
+        <div class="upgrade-description">
+          +25 energy capacity
+        </div>
+      </div>
+
+      <button class="buy-button" id="energyUpgrade">
+        75 🪙
+      </button>
+    </div>
+  </div>
+
+  <!-- STATISTICS -->
+  <div class="card statistics">
+    <div>
+      <span>Total Taps</span>
+      <strong id="totalTaps">0</strong>
+    </div>
+
+    <div>
+      <span>Power</span>
+      <strong id="powerStat">1</strong>
+    </div>
+
+    <div>
+      <span>Max Energy</span>
+      <strong id="maxEnergy">100</strong>
+    </div>
+  </div>
+
 </div>
 
 <script>
-// Telegram initialization
+"use strict";
+
+// =====================================
+// 1. TELEGRAM INITIALIZATION
+// =====================================
+
 const tg = window.Telegram?.WebApp;
-tg?.ready();
-tg?.expand();
 
-// Game data
-let balance = Number(localStorage.getItem("balance")) || 0;
-let energy = 100;
-let power = 1;
-
-function save(){
- localStorage.setItem("balance",balance);
+if (tg) {
+  tg.ready();
+  tg.expand();
 }
 
-function update(){
- document.getElementById("balance").textContent=balance;
- document.getElementById("energy").textContent=energy;
- document.getElementById("power").textContent=power;
-}
+// =====================================
+// 2. GAME STATE
+// =====================================
 
-document.getElementById("tap").onclick=()=>{
- if(energy < 1) return;
- balance += power;
- energy--;
- save();
- update();
+const state = {
+  balance: Number(localStorage.getItem("balance")) || 0,
+  power: Number(localStorage.getItem("power")) || 1,
+  maxEnergy: Number(localStorage.getItem("maxEnergy")) || 100,
+  totalTaps: Number(localStorage.getItem("totalTaps")) || 0,
+  energy: 100
 };
 
-function upgrade(){
- if(balance < 50) return;
- balance-=50;
- power++;
- save();
- update();
+state.energy = Math.min(
+  Number(localStorage.getItem("energy") ?? 100),
+  state.maxEnergy
+);
+
+// =====================================
+// 3. ELEMENTS
+// =====================================
+
+const $ = id => document.getElementById(id);
+
+const balanceEl = $("balance");
+const powerEl = $("power");
+const energyText = $("energyText");
+const energyFill = $("energyFill");
+const tapButton = $("tapButton");
+
+const rewardButton = $("rewardButton");
+const rewardStatus = $("rewardStatus");
+
+// =====================================
+// 4. SAVE GAME
+// =====================================
+
+function saveGame() {
+  localStorage.setItem("balance", state.balance);
+  localStorage.setItem("power", state.power);
+  localStorage.setItem("maxEnergy", state.maxEnergy);
+  localStorage.setItem("energy", state.energy);
+  localStorage.setItem("totalTaps", state.totalTaps);
 }
 
-setInterval(()=>{
- if(energy < 100){
-  energy++;
-  update();
- }
-},1000);
+// =====================================
+// 5. UPDATE UI
+// =====================================
 
-// SOTA ADS BANNER INTEGRATION
-// Paste the exact two Sota script tags from
-// your dashboard above this script.
-//
-// Then initialize using the generated integration
-// configuration and your newly issued token.
-//
-// Example initialization shown in Sota docs:
-//
-// SotaAds.init({
-//   token: "YOUR_NEW_INTEGRATION_TOKEN",
-//   api: "https://adsota.io",
-//   auto: true
-// });
-//
-// Do not guess SDK script URLs.
+function updateUI() {
 
-// REWARDED VIDEO
-// No verified rewarded-video method or completion
-// callback was available in the supplied documentation.
-// Therefore, do not award coins or pretend an ad played.
+  balanceEl.textContent = state.balance;
+  powerEl.textContent = state.power;
 
-document.getElementById("watch").onclick=()=>{
- document.getElementById("status").textContent=
- "Rewarded video integration is not configured. Please check Sota Ads support.";
-};
+  $("tapPower").textContent = state.power;
 
-update();
+  energyText.textContent =
+    state.energy + " / " + state.maxEnergy;
+
+  energyFill.style.width =
+    (state.energy / state.maxEnergy * 100) + "%";
+
+  $("totalTaps").textContent = state.totalTaps;
+  $("powerStat").textContent = state.power;
+  $("maxEnergy").textContent = state.maxEnergy;
+
+  $("level").textContent =
+    "Lv. " + (Math.floor(state.totalTaps / 50) + 1);
+
+  tapButton.disabled = state.energy <= 0;
+
+  $("powerUpgrade").disabled = state.balance < 50;
+  $("energyUpgrade").disabled = state.balance < 75;
+
+  saveGame();
+}
+
+// =====================================
+// 6. TAP SYSTEM
+// =====================================
+
+tapButton.addEventListener("click", () => {
+
+  if (state.energy <= 0) return;
+
+  state.energy--;
+  state.balance += state.power;
+  state.totalTaps++;
+
+  try {
+    tg?.HapticFeedback?.impactOccurred("medium");
+  } catch(e) {}
+
+  updateUI();
+
+});
+
+// =====================================
+// 7. ENERGY REGENERATION
+// =====================================
+
+setInterval(() => {
+
+  if (state.energy < state.maxEnergy) {
+
+    state.energy = Math.min(
+      state.energy + 1,
+      state.maxEnergy
+    );
+
+    updateUI();
+  }
+
+}, 3000);
+
+// =====================================
+// 8. SOTA ADS INITIALIZATION
+// =====================================
+
+// Replace this placeholder with a newly
+// issued token. Never publish your token.
+
+const SOTA_TOKEN = "YOUR_NEW_SOTA_TOKEN";
+
+function initializeSota() {
+
+  const status = $("sota-status");
+
+  if (!window.SotaAds) {
+    status.textContent = "Sota SDK not loaded. Check network and script URL.";
+    console.error("SotaAds SDK unavailable");
+    return;
+  }
+
+  if (!SOTA_TOKEN ||
+      SOTA_TOKEN === "YOUR_NEW_SOTA_TOKEN") {
+    status.textContent = "Please configure your new Sota token.";
+    return;
+  }
+
+  try {
+
+    window.SotaAds.init({
+      token: SOTA_TOKEN,
+      api: "https://adsota.io",
+      auto: true
+    });
+
+    status.textContent =
+      "Sota initialization called. Waiting for automatic banner rendering.";
+
+    console.log("Sota Ads initialized");
+
+  } catch(error) {
+
+    status.textContent = "Sota initialization error. Check console.";
+
+    console.error("Sota error:", error);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeSota);
+} else {
+  initializeSota();
+}
+
+// =====================================
+// 9. REWARDED VIDEO
+// =====================================
+
+// The supplied Sota integration documents
+// initialization and automatic banner ads.
+// It does not document a rewarded-video
+// request method or completion callback.
+//
+// No coins are awarded without verified
+// rewarded-ad completion.
+
+rewardButton.addEventListener("click", () => {
+
+  rewardStatus.textContent =
+    "Rewarded video is not configured. Please obtain the official Sota rewarded-ad API.";
+
+  console.warn(
+    "Rewarded video API not verified. No reward issued."
+  );
+
+});
+
+// =====================================
+// 10. POWER UPGRADE
+// =====================================
+
+$("powerUpgrade").addEventListener("click", () => {
+
+  if (state.balance < 50) return;
+
+  state.balance -= 50;
+  state.power++;
+
+  updateUI();
+
+});
+
+// =====================================
+// 11. ENERGY UPGRADE
+// =====================================
+
+$("energyUpgrade").addEventListener("click", () => {
+
+  if (state.balance < 75) return;
+
+  state.balance -= 75;
+  state.maxEnergy += 25;
+
+  state.energy = Math.min(
+    state.energy + 25,
+    state.maxEnergy
+  );
+
+  updateUI();
+
+});
+
+// =====================================
+// 12. START GAME
+// =====================================
+
+updateUI();
+
+console.log("Fabb Bot mining game started");
+
 </script>
 
 </body>
 </html>
+
+
+
+
+
 
         
 
