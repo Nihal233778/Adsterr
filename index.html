@@ -1,566 +1,153 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tap & Earn • SotaAds</title>
-    <!-- Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- SotaAds TMA SDK (official) -->
-    <script src="https://adsota.io/public/sdk/tma.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gold Miner - Tap & Earn</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--tg-theme-bg-color, #f5f5f7);
-            color: var(--tg-theme-text-color, #000000);
-            min-height: 100vh;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        .app-container {
-            max-width: 420px;
-            width: 100%;
-        }
-
-        /* ----- HEADER ----- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            font-size: 22px;
-            font-weight: 700;
-        }
-        .stats-badge {
-            background: var(--tg-theme-secondary-bg-color, #e0e0e0);
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        /* ----- BALANCE CARD ----- */
-        .balance-card {
-            background: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .balance-label {
-            font-size: 14px;
-            opacity: 0.6;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .balance-amount {
-            font-size: 48px;
-            font-weight: 800;
-            margin: 8px 0;
-            background: linear-gradient(135deg, var(--tg-theme-button-color, #0088cc), #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .tap-power-info {
-            font-size: 14px;
-            opacity: 0.7;
-        }
-
-        /* ----- ENERGY BAR ----- */
-        .energy-section {
-            margin-bottom: 20px;
-        }
-        .energy-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        .energy-bar-bg {
-            width: 100%;
-            height: 10px;
-            background: var(--tg-theme-secondary-bg-color, #e0e0e0);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .energy-bar-fill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, #ffd93d, #ff6b6b);
-            border-radius: 10px;
-            transition: width 0.2s ease;
-        }
-
-        /* ----- BIG TAP BUTTON ----- */
-        .tap-button {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, var(--tg-theme-button-color, #0088cc), #005a8c);
-            border: none;
-            box-shadow: 0 8px 24px rgba(0, 136, 204, 0.4), inset 0 -4px 0 rgba(0,0,0,0.2);
-            color: white;
-            font-size: 22px;
-            font-weight: 700;
-            margin: 10px auto 25px auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-            touch-action: manipulation;
-            position: relative;
-        }
-        .tap-button:active {
-            transform: scale(0.92);
-        }
-        .tap-button:disabled {
-            opacity: 0.5;
-            transform: scale(0.95);
-            cursor: not-allowed;
-        }
-        .tap-button .emoji {
-            font-size: 42px;
-            margin-bottom: 4px;
-        }
-        .tap-button .hint {
-            font-size: 13px;
-            font-weight: 400;
-            opacity: 0.8;
-        }
-
-        /* ----- SHOW AD BUTTON (integrated SotaAds) ----- */
-        .show-ad-btn {
-            width: 100%;
-            padding: 14px 18px;
-            border: none;
-            border-radius: 16px;
-            background: #ffd93d;
-            color: #1a1a1a;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 16px;
-            transition: opacity 0.2s ease, transform 0.1s ease;
-            touch-action: manipulation;
-            box-shadow: 0 4px 10px rgba(255, 217, 61, 0.3);
-        }
-        .show-ad-btn:active {
-            opacity: 0.75;
-            transform: scale(0.98);
-        }
-        .show-ad-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ----- SHOP / UPGRADES ----- */
-        .shop-section {
-            background: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-        .shop-title {
-            font-weight: 700;
-            font-size: 18px;
-            margin-bottom: 12px;
-        }
-        .shop-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--tg-theme-bg-color, #f0f0f0);
-        }
-        .shop-item:last-child { border-bottom: none; }
-        .shop-item-info { display: flex; flex-direction: column; }
-        .shop-item-name { font-weight: 600; }
-        .shop-item-desc { font-size: 13px; opacity: 0.6; }
-        .buy-btn {
-            background: var(--tg-theme-button-color, #0088cc);
-            color: var(--tg-theme-button-text-color, #fff);
-            border: none;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .buy-btn:active { opacity: 0.6; }
-        .buy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        /* ----- STATS FOOTER ----- */
-        .stats-footer {
-            display: flex;
-            justify-content: space-around;
-            padding: 14px;
-            background: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: 16px;
-            font-size: 13px;
-            text-align: center;
-        }
-        .stats-footer span { opacity: 0.6; display: block; font-size: 11px; }
-        .stats-footer strong { font-size: 16px; }
-
-        /* Scrollbar Hide */
-        ::-webkit-scrollbar { width: 0; }
-    </style>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:20px;
+ font-family:Arial,sans-serif;
+ background:#101827;color:white;
+ text-align:center
+}
+h2{color:#ffd34e}
+.card{
+ background:#202c40;
+ padding:22px;border-radius:20px;
+ margin:18px 0
+}
+.balance{font-size:48px;color:#ffd34e}
+button{
+ border:0;border-radius:14px;
+ padding:16px 24px;
+ font-size:17px;font-weight:bold;
+ cursor:pointer;margin:8px
+}
+#tap{background:#168de0;color:white;
+ width:220px;height:220px;border-radius:50%;
+ font-size:27px}
+#watch{background:#f6b934;color:#171717}
+#status{color:#ffd34e;min-height:25px}
+.banner{
+ background:#202c40;border:1px dashed #64748b;
+ border-radius:14px;padding:18px;
+ min-height:100px;margin:18px 0
+}
+</style>
 </head>
+
 <body>
 
-<div class="app-container">
+<h2>⚡ Gold Miner</h2>
+<div class="card">
+ <p>YOUR BALANCE</p>
+ <div class="balance" id="balance">0</div>
+ <p>⚡ Energy: <span id="energy">100</span>/100</p>
+</div>
 
-    <!-- HEADER -->
-    <div class="header">
-        <h1>⚡ Tap & Earn</h1>
-        <div class="stats-badge" id="levelDisplay">Lv. 1</div>
-    </div>
+<button id="tap">🪙 TAP!</button>
 
-    <!-- BALANCE -->
-    <div class="balance-card">
-        <div class="balance-label">💰 Your Balance</div>
-        <div class="balance-amount" id="balanceDisplay">0</div>
-        <div class="tap-power-info">⚡ Power: <span id="powerDisplay">1</span> per tap</div>
-    </div>
+<div class="card">
+ <h3>🎬 Watch an Ad</h3>
+ <p>Watch a video to earn 10 coins.</p>
+ <button id="watch">Watch Rewarded Ad</button>
+ <p id="status">Rewarded ads not configured yet.</p>
+</div>
 
-    <!-- ENERGY -->
-    <div class="energy-section">
-        <div class="energy-header">
-            <span>🔋 Energy</span>
-            <span id="energyText">100 / 100</span>
-        </div>
-        <div class="energy-bar-bg">
-            <div class="energy-bar-fill" id="energyFill" style="width:100%"></div>
-        </div>
-    </div>
+<h3>📢 Advertisement</h3>
+<div class="banner" id="sota-banner">
+ Sota Ads banner placement
+</div>
 
-    <!-- TAP BUTTON -->
-    <button class="tap-button" id="tapBtn">
-        <span class="emoji">🪙</span>
-        TAP!
-        <span class="hint">+<span id="tapRewardHint">1</span></span>
-    </button>
-
-    <!-- SHOW AD BUTTON (SotaAds integrated) -->
-    <button class="show-ad-btn" id="showAdBtn">📺 Show Ad +10 🪙</button>
-
-    <!-- SHOP -->
-    <div class="shop-section">
-        <div class="shop-title">🛒 Upgrades</div>
-
-        <div class="shop-item">
-            <div class="shop-item-info">
-                <span class="shop-item-name">⚡ Power Boost</span>
-                <span class="shop-item-desc">+1 coin per tap</span>
-            </div>
-            <button class="buy-btn" id="buyPowerBtn">50 🪙</button>
-        </div>
-
-        <div class="shop-item">
-            <div class="shop-item-info">
-                <span class="shop-item-name">🔋 Max Energy</span>
-                <span class="shop-item-desc">+25 energy cap</span>
-            </div>
-            <button class="buy-btn" id="buyEnergyBtn">75 🪙</button>
-        </div>
-    </div>
-
-    <!-- STATS -->
-    <div class="stats-footer">
-        <div><span>👆 Taps</span><strong id="statTaps">0</strong></div>
-        <div><span>⚡ Power</span><strong id="statPower">1</strong></div>
-        <div><span>🔋 Max Energy</span><strong id="statMaxEnergy">100</strong></div>
-    </div>
+<div class="card">
+ <h3>🛒 Upgrades</h3>
+ <button onclick="upgrade()">Power Boost - 50 coins</button>
+ <p>Power: <span id="power">1</span></p>
 </div>
 
 <script>
-    (function() {
-        'use strict';
+// Telegram initialization
+const tg = window.Telegram?.WebApp;
+tg?.ready();
+tg?.expand();
 
-        // =====================================================
-        // 1. CONFIG — SotaAds token from second snippet
-        // =====================================================
-        const SOTA_CONFIG = {
-            token: 'sota_dEwcD3QS9EXbUItY8Z4QTjEI5tQEUfH5Iw68xiqe-rQ',
-            api: 'https://adsota.io',
-            auto: true
-        };
+// Game data
+let balance = Number(localStorage.getItem("balance")) || 0;
+let energy = 100;
+let power = 1;
 
-        // =====================================================
-        // 2. TELEGRAM WEB APP SDK
-        // =====================================================
-        let tg = null;
-        try {
-            if (window.Telegram && window.Telegram.WebApp) {
-                tg = window.Telegram.WebApp;
-                tg.ready();
-                tg.expand();
-                tg.enableClosingConfirmation();
-                console.log('📱 Telegram WebApp ready');
-            }
-        } catch (e) { console.warn('Not in Telegram context', e); }
+function save(){
+ localStorage.setItem("balance",balance);
+}
 
-        function haptic(style = 'medium') {
-            try { if (tg) tg.HapticFeedback.impactOccurred(style); } catch (e) {}
-        }
+function update(){
+ document.getElementById("balance").textContent=balance;
+ document.getElementById("energy").textContent=energy;
+ document.getElementById("power").textContent=power;
+}
 
-        // =====================================================
-        // 3. STATE (LocalStorage persistence)
-        // =====================================================
-        const state = {
-            balance: parseInt(localStorage.getItem('tma_balance') || '0'),
-            tapPower: parseInt(localStorage.getItem('tma_power') || '1'),
-            maxEnergy: parseInt(localStorage.getItem('tma_maxEnergy') || '100'),
-            totalTaps: parseInt(localStorage.getItem('tma_taps') || '0'),
-            energy: 100
-        };
-        state.energy = Math.min(
-            parseInt(localStorage.getItem('tma_energy') || '100'),
-            state.maxEnergy
-        );
+document.getElementById("tap").onclick=()=>{
+ if(energy < 1) return;
+ balance += power;
+ energy--;
+ save();
+ update();
+};
 
-        function saveState() {
-            localStorage.setItem('tma_balance', state.balance);
-            localStorage.setItem('tma_power', state.tapPower);
-            localStorage.setItem('tma_maxEnergy', state.maxEnergy);
-            localStorage.setItem('tma_taps', state.totalTaps);
-            localStorage.setItem('tma_energy', state.energy);
-        }
+function upgrade(){
+ if(balance < 50) return;
+ balance-=50;
+ power++;
+ save();
+ update();
+}
 
-        // =====================================================
-        // 4. DOM REFS
-        // =====================================================
-        const balanceEl = document.getElementById('balanceDisplay');
-        const powerEl = document.getElementById('powerDisplay');
-        const tapRewardHint = document.getElementById('tapRewardHint');
-        const energyText = document.getElementById('energyText');
-        const energyFill = document.getElementById('energyFill');
-        const tapBtn = document.getElementById('tapBtn');
-        const showAdBtn = document.getElementById('showAdBtn');
-        const buyPowerBtn = document.getElementById('buyPowerBtn');
-        const buyEnergyBtn = document.getElementById('buyEnergyBtn');
-        const statTaps = document.getElementById('statTaps');
-        const statPower = document.getElementById('statPower');
-        const statMaxEnergy = document.getElementById('statMaxEnergy');
-        const levelDisplay = document.getElementById('levelDisplay');
+setInterval(()=>{
+ if(energy < 100){
+  energy++;
+  update();
+ }
+},1000);
 
-        // =====================================================
-        // 5. UI UPDATE
-        // =====================================================
-        function updateUI() {
-            balanceEl.textContent = state.balance;
-            powerEl.textContent = state.tapPower;
-            tapRewardHint.textContent = state.tapPower;
-            energyText.textContent = `${Math.floor(state.energy)} / ${state.maxEnergy}`;
-            const pct = (state.energy / state.maxEnergy) * 100;
-            energyFill.style.width = `${Math.min(pct, 100)}%`;
+// SOTA ADS BANNER INTEGRATION
+// Paste the exact two Sota script tags from
+// your dashboard above this script.
+//
+// Then initialize using the generated integration
+// configuration and your newly issued token.
+//
+// Example initialization shown in Sota docs:
+//
+// SotaAds.init({
+//   token: "YOUR_NEW_INTEGRATION_TOKEN",
+//   api: "https://adsota.io",
+//   auto: true
+// });
+//
+// Do not guess SDK script URLs.
 
-            statTaps.textContent = state.totalTaps;
-            statPower.textContent = state.tapPower;
-            statMaxEnergy.textContent = state.maxEnergy;
+// REWARDED VIDEO
+// No verified rewarded-video method or completion
+// callback was available in the supplied documentation.
+// Therefore, do not award coins or pretend an ad played.
 
-            const level = Math.floor(state.totalTaps / 50) + 1;
-            levelDisplay.textContent = `Lv. ${level}`;
+document.getElementById("watch").onclick=()=>{
+ document.getElementById("status").textContent=
+ "Rewarded video integration is not configured. Please check Sota Ads support.";
+};
 
-            tapBtn.disabled = (state.energy < 1);
-            buyPowerBtn.disabled = (state.balance < 50);
-            buyEnergyBtn.disabled = (state.balance < 75);
-
-            saveState();
-        }
-
-        // =====================================================
-        // 6. ENERGY REGEN
-        // =====================================================
-        setInterval(() => {
-            if (state.energy < state.maxEnergy) {
-                state.energy = Math.min(state.energy + 1, state.maxEnergy);
-                updateUI();
-            }
-        }, 3000);
-
-        // =====================================================
-        // 7. TAP LOGIC
-        // =====================================================
-        tapBtn.addEventListener('click', function () {
-            if (state.energy < 1) { haptic('error'); return; }
-            state.energy -= 1;
-            state.balance += state.tapPower;
-            state.totalTaps += 1;
-            haptic('medium');
-            updateUI();
-            tapBtn.style.transform = 'scale(0.88)';
-            setTimeout(() => { tapBtn.style.transform = ''; }, 120);
-        });
-
-        // =====================================================
-        // 8. SOTA ADS — initialization (called after window.load)
-        // =====================================================
-        let sotaReady = false;
-
-        function initSotaAds() {
-            if (!window.SotaAds) {
-                console.warn('❌ SotaAds SDK NOT loaded — check network or script URL');
-                return;
-            }
-            try {
-                window.SotaAds.init(SOTA_CONFIG);
-                sotaReady = true;
-                console.log('✅ SotaAds initialized with token:', SOTA_CONFIG.token);
-                console.log('🔍 SotaAds object keys:', Object.keys(window.SotaAds));
-            } catch (e) {
-                console.error('❌ SotaAds init error:', e);
-            }
-        }
-
-        // Wait until SDK is fully loaded
-        window.addEventListener('load', function () {
-            // Give the SDK a moment to register itself
-            setTimeout(initSotaAds, 300);
-        });
-
-        // =====================================================
-        // 9. SHOW AD BUTTON LOGIC
-        // =====================================================
-        function triggerSotaAd() {
-            return new Promise((resolve, reject) => {
-                const sota = window.SotaAds;
-
-                if (!sota) {
-                    reject(new Error('SotaAds SDK not loaded'));
-                    return;
-                }
-
-                console.log('🔍 Attempting to show ad. Available methods:', 
-                    Object.keys(sota).filter(k => typeof sota[k] === 'function'));
-
-                // Try every possible show method the SDK might expose
-                const methods = ['showAd', 'showRewarded', 'show', 'loadAndShow', 'loadAd'];
-
-                for (const method of methods) {
-                    if (typeof sota[method] === 'function') {
-                        try {
-                            console.log(`▶️ Calling SotaAds.${method}()`);
-                            const result = sota[method]();
-                            if (result && typeof result.then === 'function') {
-                                result.then(resolve).catch(reject);
-                            } else {
-                                resolve(result);
-                            }
-                            return;
-                        } catch (e) {
-                            console.warn(`⚠️ ${method} threw:`, e);
-                        }
-                    }
-                }
-
-                // If auto mode is on, the SDK may display automatically
-                if (SOTA_CONFIG.auto) {
-                    console.warn('⚠️ No show method found. Auto mode active — SDK may handle display itself.');
-                    resolve({ auto: true });
-                } else {
-                    reject(new Error('No show method available on SotaAds'));
-                }
-            });
-        }
-
-        showAdBtn.addEventListener('click', function () {
-            haptic('heavy');
-            showAdBtn.disabled = true;
-            showAdBtn.textContent = '⏳ Loading Ad...';
-
-            triggerSotaAd()
-                .then((result) => {
-                    console.log('✅ Ad triggered successfully:', result);
-                    // Reward only if ad actually displayed
-                    state.balance += 10;
-                    haptic('success');
-                    updateUI();
-                    showAdBtn.textContent = '✅ +10 🪙';
-                    setTimeout(() => {
-                        showAdBtn.textContent = '📺 Show Ad +10 🪙';
-                        showAdBtn.disabled = false;
-                    }, 1500);
-                })
-                .catch((err) => {
-                    console.error('❌ Ad failed:', err);
-                    showAdBtn.textContent = '⚠️ Ad unavailable';
-                    setTimeout(() => {
-                        showAdBtn.textContent = '📺 Show Ad +10 🪙';
-                        showAdBtn.disabled = false;
-                    }, 2000);
-                });
-        });
-
-        // =====================================================
-        // 10. SHOP LOGIC
-        // =====================================================
-        buyPowerBtn.addEventListener('click', function () {
-            if (state.balance < 50) { haptic('error'); return; }
-            state.balance -= 50;
-            state.tapPower += 1;
-            haptic('success');
-            updateUI();
-        });
-
-        buyEnergyBtn.addEventListener('click', function () {
-            if (state.balance < 75) { haptic('error'); return; }
-            state.balance -= 75;
-            state.maxEnergy += 25;
-            state.energy = Math.min(state.energy + 25, state.maxEnergy);
-            haptic('success');
-            updateUI();
-        });
-
-        // =====================================================
-        // 11. INIT
-        // =====================================================
-        updateUI();
-        console.log('🚀 Tap & Earn TMA ready!');
-
-        // Welcome toast for new users
-        if (state.balance === 0 && state.totalTaps === 0) {
-            setTimeout(() => {
-                const welcome = document.createElement('div');
-                welcome.style.cssText = `
-                    position:fixed; bottom:20px; left:20px; right:20px;
-                    background: var(--tg-theme-button-color, #0088cc);
-                    color: #fff; padding:16px; border-radius:16px;
-                    text-align:center; font-weight:600; z-index:10;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                `;
-                welcome.textContent = '👋 Tap the big coin to start earning!';
-                document.body.appendChild(welcome);
-                setTimeout(() => welcome.remove(), 3000);
-            }, 500);
-        }
-    })();
+update();
 </script>
 
 </body>
 </html>
+
         
 
         
