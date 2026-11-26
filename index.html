@@ -1,241 +1,262 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fabb Bot - Tap & Earn</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Fabb Bot – Tap & Earn</title>
 
-<!-- Telegram SDK -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Telegram SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<!-- Official Sota Ads SDK supplied by you -->
-<script src="https://adsota.io/public/sdk/tma.js"></script>
+  <!-- Sota Ads SDK (official) -->
+  <script src="https://adsota.io/public/sdk/tma.js"></script>
 
-<style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-body {
-  font-family: Arial, sans-serif;
-  background: #101827;
-  color: #fff;
-  padding: 16px;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background: #101827;
+      color: #fff;
+      padding: 16px;
+    }
 
-.container {
-  max-width: 450px;
-  margin: auto;
-}
+    .container {
+      max-width: 450px;
+      margin: auto;
+    }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0 22px;
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0 22px;
+    }
 
-.header h2 {
-  font-size: 25px;
-}
+    .header h2 {
+      font-size: 25px;
+    }
 
-.level {
-  background: #263449;
-  padding: 10px 16px;
-  border-radius: 25px;
-}
+    .level {
+      background: #263449;
+      padding: 10px 16px;
+      border-radius: 25px;
+    }
 
-.card {
-  background: #202d43;
-  padding: 24px;
-  border-radius: 24px;
-  margin-bottom: 20px;
-}
+    .card {
+      background: #202d43;
+      padding: 24px;
+      border-radius: 24px;
+      margin-bottom: 20px;
+    }
 
-.balance-card {
-  text-align: center;
-}
+    .balance-card {
+      text-align: center;
+    }
 
-.balance-label {
-  color: #aaa;
-  letter-spacing: 2px;
-}
+    .balance-label {
+      color: #aaa;
+      letter-spacing: 2px;
+    }
 
-.balance {
-  font-size: 55px;
-  font-weight: bold;
-  color: #ffd34e;
-  margin: 12px;
-}
+    .balance {
+      font-size: 55px;
+      font-weight: bold;
+      color: #ffd34e;
+      margin: 12px;
+    }
 
-.power-text {
-  color: #ccc;
-}
+    .power-text {
+      color: #ccc;
+    }
 
-.energy-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
+    .energy-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
 
-.energy-bg {
-  width: 100%;
-  height: 13px;
-  background: #39465a;
-  border-radius: 20px;
-  overflow: hidden;
-}
+    .energy-bg {
+      width: 100%;
+      height: 13px;
+      background: #39465a;
+      border-radius: 20px;
+      overflow: hidden;
+    }
 
-.energy-fill {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg,#ffd93d,#ff6464);
-  transition: width .2s;
-}
+    .energy-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #ffd93d, #ff6464);
+      transition: width 0.2s;
+    }
 
-.tap-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 15px 0 30px;
-}
+    .tap-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 15px 0 30px;
+    }
 
-.tap-button {
-  width: 260px;
-  height: 260px;
-  border: none;
-  border-radius: 50%;
-  background: #168de0;
-  color: white;
-  font-size: 32px;
-  font-weight: bold;
-  box-shadow: 0 10px 25px #168de044;
-  cursor: pointer;
-}
+    .tap-button {
+      width: 260px;
+      height: 260px;
+      border: none;
+      border-radius: 50%;
+      background: #168de0;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      box-shadow: 0 10px 25px #168de044;
+      cursor: pointer;
+    }
 
-.tap-button:active {
-  transform: scale(.94);
-}
+    .tap-button:active {
+      transform: scale(0.94);
+    }
 
-.tap-button:disabled {
-  opacity: .5;
-}
+    .tap-button:disabled {
+      opacity: 0.5;
+    }
 
-.tap-button span {
-  display: block;
-  margin-bottom: 12px;
-  font-size: 45px;
-}
+    .tap-button span {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 45px;
+    }
 
-.section-title {
-  font-size: 23px;
-  margin-bottom: 20px;
-  text-align: center;
-}
+    .section-title {
+      font-size: 23px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
 
-.reward-description {
-  text-align: center;
-  color: #ddd;
-  margin-bottom: 22px;
-  line-height: 1.5;
-}
+    .reward-description {
+      text-align: center;
+      color: #ddd;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
 
-.reward-button {
-  display: block;
-  width: 100%;
-  border: none;
-  border-radius: 15px;
-  padding: 19px;
-  background: #ffbd32;
-  color: #171717;
-  font-size: 19px;
-  font-weight: bold;
-  cursor: pointer;
-}
+    .reward-button {
+      display: block;
+      width: 100%;
+      border: none;
+      border-radius: 15px;
+      padding: 19px;
+      background: #ffbd32;
+      color: #171717;
+      font-size: 19px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-.reward-button:disabled {
-  opacity: .6;
-}
+    .reward-button:disabled {
+      opacity: 0.6;
+    }
 
-.status {
-  margin-top: 18px;
-  text-align: center;
-  color: #ffd34e;
-  line-height: 1.5;
-  font-size: 14px;
-}
+    .status {
+      margin-top: 18px;
+      text-align: center;
+      color: #ffd34e;
+      line-height: 1.5;
+      font-size: 14px;
+    }
 
-.banner-heading {
-  text-align: center;
-  font-size: 23px;
-  margin: 24px 0 15px;
-}
+    .banner-heading {
+      text-align: center;
+      font-size: 23px;
+      margin: 24px 0 15px;
+    }
 
-/* Sota SDK controls automatic ad rendering */
-#sota-status {
-  font-size: 12px;
-  color: #aaa;
-  text-align: center;
-  margin: 8px 0 20px;
-}
+    #sota-status {
+      font-size: 12px;
+      color: #aaa;
+      text-align: center;
+      margin: 8px 0 20px;
+    }
 
-.upgrade-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  text-align: center;
-}
+    .upgrade-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
 
-.upgrade-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 17px 0;
-  border-bottom: 1px solid #ffffff20;
-}
+    .upgrade-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 17px 0;
+      border-bottom: 1px solid #ffffff20;
+    }
 
-.upgrade-item:last-child {
-  border-bottom: none;
-}
+    .upgrade-item:last-child {
+      border-bottom: none;
+    }
 
-.upgrade-description {
-  color: #aaa;
-  font-size: 14px;
-  margin-top: 5px;
-}
+    .upgrade-description {
+      color: #aaa;
+      font-size: 14px;
+      margin-top: 5px;
+    }
 
-.buy-button {
-  border: none;
-  background: #168de0;
-  color: white;
-  padding: 12px 18px;
-  border-radius: 30px;
-  font-weight: bold;
-}
+    .buy-button {
+      border: none;
+      background: #168de0;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 30px;
+      font-weight: bold;
+    }
 
-.buy-button:disabled {
-  opacity: .4;
-}
+    .buy-button:disabled {
+      opacity: 0.4;
+    }
 
-.statistics {
-  display: flex;
-  justify-content: space-around;
-  text-align: center;
-}
+    .statistics {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
 
-.statistics span {
-  display: block;
-  font-size: 12px;
-  color: #aaa;
-  margin-bottom: 7px;
-}
+    .statistics span {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 7px;
+    }
 
-.statistics strong {
-  font-size: 19px;
-}
-</style>
+    .statistics strong {
+      font-size: 19px;
+    }
+
+    /* Telegram link button style */
+    .telegram-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #229ED9;
+      color: white;
+      text-decoration: none;
+      padding: 14px 24px;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 18px;
+      margin: 0 auto 20px auto;
+      width: fit-content;
+      transition: opacity 0.2s;
+      box-shadow: 0 4px 15px #229ed944;
+    }
+
+    .telegram-btn:active {
+      opacity: 0.7;
+    }
+  </style>
 </head>
 
 <body>
@@ -247,6 +268,11 @@ body {
     <h2>⚡ Tap & Earn</h2>
     <div class="level" id="level">Lv. 1</div>
   </div>
+
+  <!-- TELEGRAM BUTTON LINK -->
+  <a href="https://t.me/fabbbot" target="_blank" rel="noopener noreferrer" class="telegram-btn">
+    ✈️ Open in Telegram
+  </a>
 
   <!-- BALANCE -->
   <div class="card balance-card">
@@ -356,259 +382,239 @@ body {
 </div>
 
 <script>
-"use strict";
+  "use strict";
 
-// =====================================
-// 1. TELEGRAM INITIALIZATION
-// =====================================
+  // =====================================
+  // 1. TELEGRAM INITIALIZATION
+  // =====================================
 
-const tg = window.Telegram?.WebApp;
+  const tg = window.Telegram?.WebApp;
 
-if (tg) {
-  tg.ready();
-  tg.expand();
-}
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
 
-// =====================================
-// 2. GAME STATE
-// =====================================
+  // =====================================
+  // 2. GAME STATE
+  // =====================================
 
-const state = {
-  balance: Number(localStorage.getItem("balance")) || 0,
-  power: Number(localStorage.getItem("power")) || 1,
-  maxEnergy: Number(localStorage.getItem("maxEnergy")) || 100,
-  totalTaps: Number(localStorage.getItem("totalTaps")) || 0,
-  energy: 100
-};
+  const state = {
+    balance: Number(localStorage.getItem("balance")) || 0,
+    power: Number(localStorage.getItem("power")) || 1,
+    maxEnergy: Number(localStorage.getItem("maxEnergy")) || 100,
+    totalTaps: Number(localStorage.getItem("totalTaps")) || 0,
+    energy: 100
+  };
 
-state.energy = Math.min(
-  Number(localStorage.getItem("energy") ?? 100),
-  state.maxEnergy
-);
+  state.energy = Math.min(
+    Number(localStorage.getItem("energy") ?? 100),
+    state.maxEnergy
+  );
 
-// =====================================
-// 3. ELEMENTS
-// =====================================
+  // =====================================
+  // 3. ELEMENTS
+  // =====================================
 
-const $ = id => document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
-const balanceEl = $("balance");
-const powerEl = $("power");
-const energyText = $("energyText");
-const energyFill = $("energyFill");
-const tapButton = $("tapButton");
+  const balanceEl = $("balance");
+  const powerEl = $("power");
+  const energyText = $("energyText");
+  const energyFill = $("energyFill");
+  const tapButton = $("tapButton");
 
-const rewardButton = $("rewardButton");
-const rewardStatus = $("rewardStatus");
+  const rewardButton = $("rewardButton");
+  const rewardStatus = $("rewardStatus");
 
-// =====================================
-// 4. SAVE GAME
-// =====================================
+  // =====================================
+  // 4. SAVE GAME
+  // =====================================
 
-function saveGame() {
-  localStorage.setItem("balance", state.balance);
-  localStorage.setItem("power", state.power);
-  localStorage.setItem("maxEnergy", state.maxEnergy);
-  localStorage.setItem("energy", state.energy);
-  localStorage.setItem("totalTaps", state.totalTaps);
-}
+  function saveGame() {
+    localStorage.setItem("balance", state.balance);
+    localStorage.setItem("power", state.power);
+    localStorage.setItem("maxEnergy", state.maxEnergy);
+    localStorage.setItem("energy", state.energy);
+    localStorage.setItem("totalTaps", state.totalTaps);
+  }
 
-// =====================================
-// 5. UPDATE UI
-// =====================================
+  // =====================================
+  // 5. UPDATE UI
+  // =====================================
 
-function updateUI() {
+  function updateUI() {
 
-  balanceEl.textContent = state.balance;
-  powerEl.textContent = state.power;
+    balanceEl.textContent = state.balance;
+    powerEl.textContent = state.power;
 
-  $("tapPower").textContent = state.power;
+    $("tapPower").textContent = state.power;
 
-  energyText.textContent =
-    state.energy + " / " + state.maxEnergy;
+    energyText.textContent =
+      state.energy + " / " + state.maxEnergy;
 
-  energyFill.style.width =
-    (state.energy / state.maxEnergy * 100) + "%";
+    energyFill.style.width =
+      (state.energy / state.maxEnergy * 100) + "%";
 
-  $("totalTaps").textContent = state.totalTaps;
-  $("powerStat").textContent = state.power;
-  $("maxEnergy").textContent = state.maxEnergy;
+    $("totalTaps").textContent = state.totalTaps;
+    $("powerStat").textContent = state.power;
+    $("maxEnergy").textContent = state.maxEnergy;
 
-  $("level").textContent =
-    "Lv. " + (Math.floor(state.totalTaps / 50) + 1);
+    $("level").textContent =
+      "Lv. " + (Math.floor(state.totalTaps / 50) + 1);
 
-  tapButton.disabled = state.energy <= 0;
+    tapButton.disabled = state.energy <= 0;
 
-  $("powerUpgrade").disabled = state.balance < 50;
-  $("energyUpgrade").disabled = state.balance < 75;
+    $("powerUpgrade").disabled = state.balance < 50;
+    $("energyUpgrade").disabled = state.balance < 75;
 
-  saveGame();
-}
+    saveGame();
+  }
 
-// =====================================
-// 6. TAP SYSTEM
-// =====================================
+  // =====================================
+  // 6. TAP SYSTEM
+  // =====================================
 
-tapButton.addEventListener("click", () => {
+  tapButton.addEventListener("click", () => {
 
-  if (state.energy <= 0) return;
+    if (state.energy <= 0) return;
 
-  state.energy--;
-  state.balance += state.power;
-  state.totalTaps++;
+    state.energy--;
+    state.balance += state.power;
+    state.totalTaps++;
 
-  try {
-    tg?.HapticFeedback?.impactOccurred("medium");
-  } catch(e) {}
+    try {
+      tg?.HapticFeedback?.impactOccurred("medium");
+    } catch (e) {}
 
-  updateUI();
+    updateUI();
 
-});
+  });
 
-// =====================================
-// 7. ENERGY REGENERATION
-// =====================================
+  // =====================================
+  // 7. ENERGY REGENERATION
+  // =====================================
 
-setInterval(() => {
+  setInterval(() => {
 
-  if (state.energy < state.maxEnergy) {
+    if (state.energy < state.maxEnergy) {
+
+      state.energy = Math.min(
+        state.energy + 1,
+        state.maxEnergy
+      );
+
+      updateUI();
+    }
+
+  }, 3000);
+
+  // =====================================
+  // 8. SOTA ADS INITIALIZATION
+  // =====================================
+
+  const SOTA_TOKEN = "sota_YOUR_API_TOKEN"; // <-- Replace with your real token
+
+  function initializeSota() {
+
+    const status = $("sota-status");
+
+    if (!window.SotaAds) {
+      status.textContent = "Sota SDK not loaded. Check network and script URL.";
+      console.error("SotaAds SDK unavailable");
+      return;
+    }
+
+    if (!SOTA_TOKEN || SOTA_TOKEN === "sota_YOUR_API_TOKEN") {
+      status.textContent = "⚠️ Please set your Sota token in the script.";
+      return;
+    }
+
+    try {
+
+      window.SotaAds.init({
+        token: SOTA_TOKEN,
+        api: "https://adsota.io",
+        auto: true
+      });
+
+      status.textContent =
+        "✅ Sota initialized. Automatic banner ads will appear.";
+
+      console.log("Sota Ads initialized successfully");
+
+    } catch (error) {
+
+      status.textContent = "❌ Sota initialization error. Check console.";
+      console.error("Sota error:", error);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeSota);
+  } else {
+    initializeSota();
+  }
+
+  // =====================================
+  // 9. REWARDED VIDEO (placeholder)
+  // =====================================
+
+  rewardButton.addEventListener("click", () => {
+
+    rewardStatus.textContent =
+      "⚠️ Rewarded video is not configured. Please obtain the official Sota rewarded‑ad API.";
+
+    console.warn(
+      "Rewarded video API not verified. No reward issued."
+    );
+
+  });
+
+  // =====================================
+  // 10. POWER UPGRADE
+  // =====================================
+
+  $("powerUpgrade").addEventListener("click", () => {
+
+    if (state.balance < 50) return;
+
+    state.balance -= 50;
+    state.power++;
+
+    updateUI();
+
+  });
+
+  // =====================================
+  // 11. ENERGY UPGRADE
+  // =====================================
+
+  $("energyUpgrade").addEventListener("click", () => {
+
+    if (state.balance < 75) return;
+
+    state.balance -= 75;
+    state.maxEnergy += 25;
 
     state.energy = Math.min(
-      state.energy + 1,
+      state.energy + 25,
       state.maxEnergy
     );
 
     updateUI();
-  }
 
-}, 3000);
+  });
 
-// =====================================
-// 8. SOTA ADS INITIALIZATION
-// =====================================
-
-// Replace this placeholder with a newly
-// issued token. Never publish your token.
-
-const SOTA_TOKEN = "YOUR_NEW_SOTA_TOKEN";
-
-function initializeSota() {
-
-  const status = $("sota-status");
-
-  if (!window.SotaAds) {
-    status.textContent = "Sota SDK not loaded. Check network and script URL.";
-    console.error("SotaAds SDK unavailable");
-    return;
-  }
-
-  if (!SOTA_TOKEN ||
-      SOTA_TOKEN === "YOUR_NEW_SOTA_TOKEN") {
-    status.textContent = "Please configure your new Sota token.";
-    return;
-  }
-
-  try {
-
-    window.SotaAds.init({
-      token: SOTA_TOKEN,
-      api: "https://adsota.io",
-      auto: true
-    });
-
-    status.textContent =
-      "Sota initialization called. Waiting for automatic banner rendering.";
-
-    console.log("Sota Ads initialized");
-
-  } catch(error) {
-
-    status.textContent = "Sota initialization error. Check console.";
-
-    console.error("Sota error:", error);
-  }
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeSota);
-} else {
-  initializeSota();
-}
-
-// =====================================
-// 9. REWARDED VIDEO
-// =====================================
-
-// The supplied Sota integration documents
-// initialization and automatic banner ads.
-// It does not document a rewarded-video
-// request method or completion callback.
-//
-// No coins are awarded without verified
-// rewarded-ad completion.
-
-rewardButton.addEventListener("click", () => {
-
-  rewardStatus.textContent =
-    "Rewarded video is not configured. Please obtain the official Sota rewarded-ad API.";
-
-  console.warn(
-    "Rewarded video API not verified. No reward issued."
-  );
-
-});
-
-// =====================================
-// 10. POWER UPGRADE
-// =====================================
-
-$("powerUpgrade").addEventListener("click", () => {
-
-  if (state.balance < 50) return;
-
-  state.balance -= 50;
-  state.power++;
+  // =====================================
+  // 12. START GAME
+  // =====================================
 
   updateUI();
 
-});
-
-// =====================================
-// 11. ENERGY UPGRADE
-// =====================================
-
-$("energyUpgrade").addEventListener("click", () => {
-
-  if (state.balance < 75) return;
-
-  state.balance -= 75;
-  state.maxEnergy += 25;
-
-  state.energy = Math.min(
-    state.energy + 25,
-    state.maxEnergy
-  );
-
-  updateUI();
-
-});
-
-// =====================================
-// 12. START GAME
-// =====================================
-
-updateUI();
-
-console.log("Fabb Bot mining game started");
-
+  console.log("Fabb Bot mining game started");
 </script>
 
 </body>
 </html>
-
-
-
-
-
-        
-                        .
+    
